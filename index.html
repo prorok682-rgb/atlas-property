@@ -2,11 +2,703 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex">
-<title>Управление каталогом</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas Property — недвижимость в Лимассоле</title>
+<meta name="description" content="Atlas Property: подбор и сопровождение сделок с недвижимостью в Лимассоле. Новостройки, вторичный рынок, аренда. Для клиента бесплатно.">
+<meta property="og:title" content="Atlas Property — недвижимость в Лимассоле">
+<meta property="og:image" content="hero.jpg">
+<style>html{color-scheme:light}body{margin:0;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@400;500;600&display=swap">
+<style>
+/* Layout: sea-and-limestone single page. Sticky bar, hero with photo, filterable catalog (data in listings.json, owner-editable), services, districts, process, FAQ, contact form. */
+:root {
+  --bg: #F2F5F5;
+  --surface: #FFFFFF;
+  --fg: #0D2530;
+  --muted: #476068;
+  --line: #D3DDDE;
+  --accent: #0B5C6B;
+  --accent-fg: #FFFFFF;
+  --sun: #D99A1E;
+  --sky: #DCEBEE;
+  --sea: #7FB6C0;
+  --bld: #F7F8F6;
+  --bld2: #BFCFD1;
+  --danger: #B3261E;
+  --ok: #1B7A45;
+  --font-display: "Unbounded", "Onest", system-ui, sans-serif;
+  --font-body: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0A171C; --surface: #112830; --fg: #E6EEEF; --muted: #9DB3B8; --line: #234049;
+    --accent: #4FB7C6; --accent-fg: #06222A; --sun: #E8B340;
+    --sky: #17323B; --sea: #1F5A68; --bld: #8FA9AF; --bld2: #5D7C84;
+    --danger: #F2938D; --ok: #6FCF97;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0A171C; --surface: #112830; --fg: #E6EEEF; --muted: #9DB3B8; --line: #234049;
+  --accent: #4FB7C6; --accent-fg: #06222A; --sun: #E8B340;
+  --sky: #17323B; --sea: #1F5A68; --bld: #8FA9AF; --bld2: #5D7C84;
+  --danger: #F2938D; --ok: #6FCF97;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.9rem, 5.2vw, 3.3rem); letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.45rem, 3.4vw, 2.1rem); letter-spacing: -0.015em; }
+h3 { font-size: 1.05rem; }
+p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; border-radius: 4px; }
+
+.wrap { max-width: 1120px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.label { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.lead { color: var(--muted); font-size: 1.08rem; max-width: 56ch; }
+
+/* header */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar .wrap { display: flex; align-items: center; gap: 16px; padding-block: 12px; }
+.brand { font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; text-decoration: none; margin-right: auto; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.brand i { width: 14px; height: 14px; border-radius: 50%; background: var(--sun); display: inline-block; }
+.nav { display: flex; gap: 20px; font-size: 0.92rem; }
+.nav a { text-decoration: none; color: var(--muted); }
+.nav a:hover { color: var(--fg); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 600; font-size: 0.95rem; padding: 12px 20px; border-radius: 10px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg); text-decoration: none; cursor: pointer; min-height: 44px; }
+.btn:hover { filter: brightness(1.08); }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); }
+.btn.ghost:hover { border-color: var(--fg); filter: none; }
+.btn.small { padding: 8px 14px; min-height: 38px; font-size: 0.88rem; }
+.btn.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+.theme { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; font-size: 1rem; }
+@media (max-width: 860px) { .nav { display: none; } }
+
+/* hero */
+.hero { padding-block: clamp(36px, 7vw, 84px) clamp(28px, 5vw, 56px); }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); align-items: center; }
+.coords { display: inline-flex; gap: 10px; align-items: center; font-variant-numeric: tabular-nums; margin-bottom: 18px; }
+.coords b { color: var(--accent); font-weight: 600; }
+.hero h1 { margin-bottom: 18px; }
+.hero .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.hero-art { border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: var(--sky); }
+.hero-art svg, .hero-art img { display: block; width: 100%; height: auto; }
+.hero-art img { aspect-ratio: 4 / 3; object-fit: cover; object-position: 62% 50%; }
+.free { display: flex; gap: 12px; align-items: flex-start; margin-top: 22px; padding: 14px 16px; border: 1px solid var(--line); border-left: 4px solid var(--sun); border-radius: 10px; background: var(--surface); max-width: 56ch; }
+.free b { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; white-space: nowrap; }
+.free span { color: var(--muted); font-size: 0.95rem; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); margin-top: clamp(28px, 5vw, 48px); }
+.facts div { padding: 18px 16px 4px 0; }
+.facts b { display: block; font-family: var(--font-display); font-weight: 500; font-size: clamp(1.05rem, 2.6vw, 1.5rem); }
+.facts span { color: var(--muted); font-size: 0.88rem; }
+@media (max-width: 760px) { .hero .wrap { grid-template-columns: minmax(0, 1fr); } }
+
+/* sections */
+section { padding-block: clamp(40px, 7vw, 80px); }
+.band { background: var(--surface); border-block: 1px solid var(--line); }
+.head { display: grid; gap: 10px; margin-bottom: 28px; }
+
+/* catalog */
+.filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 24px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.seg button { font: inherit; font-weight: 600; font-size: 0.92rem; padding: 10px 18px; border: 0; background: transparent; color: var(--muted); cursor: pointer; min-height: 44px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field label { font-size: 0.78rem; color: var(--muted); font-weight: 600; letter-spacing: 0.04em; }
+select, input, textarea { font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 44px; width: 100%; min-width: 0; }
+.band select, .band input, .band textarea { background: var(--bg); }
+select:hover, input:hover, textarea:hover { border-color: var(--muted); }
+.filters .field { min-width: 160px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 20px; }
+.card { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.card .art { position: relative; }
+.card .art svg { display: block; width: 100%; height: auto; }
+.card .art img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--sky); cursor: zoom-in; }
+.card .count { position: absolute; right: 10px; bottom: 10px; background: rgba(13, 37, 48, 0.78); color: #fff; font-size: 0.78rem; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+.card .body { padding: 16px 18px 18px; display: grid; gap: 8px; flex: 1; align-content: start; }
+.price { font-family: var(--font-display); font-weight: 500; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.tag { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.specs { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.desc { color: var(--muted); font-size: 0.93rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.card .btn { margin-top: 6px; }
+.empty { border: 1px dashed var(--line); border-radius: 14px; padding: 32px 20px; text-align: center; display: grid; gap: 14px; justify-items: center; }
+.empty[hidden] { display: none; }
+.empty p { max-width: 52ch; color: var(--muted); }
+
+/* lightbox */
+.lb { position: fixed; inset: 0; z-index: 50; background: rgba(5, 14, 18, 0.92); display: grid; place-items: center; padding: 16px; }
+.lb[hidden] { display: none; }
+.lb img { max-width: 100%; max-height: 82vh; border-radius: 8px; display: block; }
+.lb .ctrl { position: absolute; display: flex; gap: 10px; bottom: max(16px, env(safe-area-inset-bottom, 0px)); left: 0; right: 0; justify-content: center; align-items: center; color: #fff; font-variant-numeric: tabular-nums; }
+.lb .ctrl button { min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.4); background: transparent; color: #fff; font: inherit; cursor: pointer; }
+.lb .x { position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); right: 12px; }
+
+/* services, districts */
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 28px 32px; }
+.svc { display: grid; gap: 8px; align-content: start; padding-top: 16px; border-top: 2px solid var(--accent); }
+.svc p, .dist p { color: var(--muted); font-size: 0.95rem; }
+.dist { display: grid; gap: 6px; align-content: start; padding: 18px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; }
+
+/* process */
+.steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 0 40px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 12px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.steps li::before { content: counter(s); grid-row: span 2; font-family: var(--font-display); color: var(--accent); font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.steps p { color: var(--muted); font-size: 0.95rem; }
+
+/* about + faq */
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); }
+@media (max-width: 760px) { .two { grid-template-columns: minmax(0, 1fr); } }
+.about { display: grid; gap: 14px; align-content: start; }
+details { border-bottom: 1px solid var(--line); padding: 14px 0; }
+summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; color: var(--accent); font-size: 1.3rem; line-height: 1; }
+details[open] summary::after { content: "–"; }
+details p { color: var(--muted); margin-top: 10px; font-size: 0.97rem; max-width: 60ch; }
+
+/* contact */
+.contact { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(24px, 5vw, 64px); }
+@media (max-width: 800px) { .contact { grid-template-columns: minmax(0, 1fr); } }
+.lines { display: grid; gap: 14px; margin-top: 24px; }
+.lines div { display: grid; gap: 2px; }
+.lines b { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.lines a { text-decoration-color: var(--line); text-underline-offset: 3px; }
+form { display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: clamp(18px, 3vw, 28px); }
+section:not(.band) form select, section:not(.band) form input, section:not(.band) form textarea { background: var(--bg); }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 14px; }
+textarea { min-height: 88px; resize: vertical; }
+.note { color: var(--muted); font-size: 0.85rem; }
+.result { display: grid; gap: 12px; }
+.result[hidden] { display: none; }
+.result textarea { min-height: 120px; }
+.result .acts { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* owner panel */
+.admin { background: var(--bg); border: 2px dashed var(--accent); border-radius: 16px; padding: clamp(16px, 3vw, 28px); margin-top: 36px; display: grid; gap: 18px; }
+.admin[hidden] { display: none; }
+.admin h3 { font-size: 1.1rem; }
+.admin .pair3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 14px; }
+.thumbs { display: flex; flex-wrap: wrap; gap: 10px; }
+.thumbs figure { margin: 0; position: relative; width: 88px; }
+.thumbs img { width: 88px; height: 66px; object-fit: cover; border-radius: 8px; display: block; border: 1px solid var(--line); }
+.thumbs button { position: absolute; top: -6px; right: -6px; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; line-height: 1; }
+.rows { display: grid; gap: 8px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.row .t { min-width: 0; flex: 1 1 220px; overflow-wrap: anywhere; }
+.row .t small { display: block; color: var(--muted); }
+.row .acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.row.off { opacity: 0.6; }
+.pub { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.status { font-size: 0.9rem; }
+.status.ok { color: var(--ok); }
+.status.bad { color: var(--danger); }
+.status.warn { color: var(--sun); }
+
+footer { padding-block: 28px 40px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); }
+footer .wrap { display: grid; gap: 6px; }
+</style>
+
 </head>
 <body>
-<script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="#top"><i></i><span>Atlas Property</span></a>
+    <nav class="nav" aria-label="Разделы">
+      <a href="#objects">Объекты</a><a href="#services">Услуги</a><a href="#districts">Районы</a><a href="#process">Как работаем</a><a href="#faq">Вопросы</a>
+    </nav>
+    <button class="theme" id="themeBtn" type="button" aria-label="Сменить тему">◐</button>
+    <a class="btn small" id="waTop" href="#contact" target="_blank" rel="noopener">WhatsApp</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <div class="coords label"><b>Лимассол</b> 34.68° N · 33.04° E</div>
+        <h1>Недвижимость в Лимассоле: от подбора до ключей</h1>
+        <p class="lead">Мы помогаем русскоязычным покупателям и арендаторам найти квартиру, виллу или инвестиционный объект у моря и пройти сделку без сюрпризов.</p>
+        <div class="free"><b>0 €</b><span>Для вас наши услуги бесплатны. Вознаграждение нам платит продавец или застройщик.</span></div>
+        <div class="cta">
+          <a class="btn" href="#objects">Смотреть объекты</a>
+          <a class="btn ghost" href="#contact">Оставить заявку</a>
+        </div>
+      </div>
+      <div class="hero-art" id="heroArt"><img id="heroImg" src="hero.jpg" alt="Лимассол: набережная, пляж и яхты" width="1320" height="762"></div>
+    </div>
+    <div class="wrap">
+      <div class="facts">
+        <div><b>Бесплатно</b><span>для покупателя и арендатора</span></div>
+        <div><b>6 районов</b><span>Лимассола, которые мы знаем</span></div>
+        <div><b>RU · UK · EN</b><span>говорим на вашем языке</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="band" id="objects">
+    <div class="wrap">
+      <div class="head">
+        <span class="label">Каталог</span>
+        <h2>Объекты в Лимассоле</h2>
+        <p class="lead">Новостройки, вторичный рынок, аренда, виллы и коммерческая недвижимость. Нужного нет в каталоге? Напишите, у нас больше вариантов.</p>
+      </div>
+      <div id="catalog">
+        <div class="filters">
+          <div class="seg" role="group" aria-label="Тип сделки">
+            <button type="button" data-deal="sale" aria-pressed="true">Купить</button>
+            <button type="button" data-deal="rent" aria-pressed="false">Аренда</button>
+          </div>
+          <div class="field"><label for="fDistrict">Район</label>
+            <select id="fDistrict"><option value="">Любой</option></select></div>
+          <div class="field"><label for="fType">Тип</label>
+            <select id="fType"><option value="">Любой</option></select></div>
+          <div class="field"><label for="fBudget">Бюджет</label>
+            <select id="fBudget"></select></div>
+        </div>
+        <div class="grid" id="grid" aria-live="polite"></div>
+        <div class="empty" id="empty" hidden>
+          <p>По этим условиям в каталоге ничего нет. Напишите нам, что вы ищете, и мы подберём варианты, в том числе из закрытой базы.</p>
+          <a class="btn" href="#contact">Оставить заявку</a>
+        </div>
+      </div>
+      <div class="empty" id="none" hidden>
+        <h3>Каталог обновляется</h3>
+        <p>Актуальные объекты пришлём по вашему запросу. Напишите нам бюджет, район и пожелания.</p>
+        <a class="btn" href="#contact">Оставить заявку</a>
+      </div>
+
+      <div class="admin" id="admin" hidden>
+        <div>
+          <span class="label">Только для вас</span>
+          <h3 style="margin-top:6px">Управление каталогом</h3>
+          <p class="note" style="margin-top:6px">Эту панель видят только те, кто может редактировать страницу. Добавьте или измените объекты, затем нажмите «Опубликовать каталог».</p>
+        </div>
+        <form id="aForm" novalidate>
+          <div class="pair3">
+            <div class="field"><label for="aDeal">Сделка</label><select id="aDeal"><option value="sale">Продажа</option><option value="rent">Аренда</option></select></div>
+            <div class="field"><label for="aType">Тип</label><select id="aType"></select></div>
+            <div class="field"><label for="aDistrict">Район</label><input id="aDistrict" list="aDistList" placeholder="Выберите или введите"><datalist id="aDistList"></datalist></div>
+          </div>
+          <div class="field"><label for="aTitle">Название</label><input id="aTitle" placeholder="Например, Апартаменты в 300 м от моря"></div>
+          <div class="pair3">
+            <div class="field"><label for="aPrice">Цена, € (для аренды в месяц)</label><input id="aPrice" inputmode="numeric" placeholder="385000"></div>
+            <div class="field"><label for="aBeds">Спальни</label><input id="aBeds" inputmode="numeric"></div>
+            <div class="field"><label for="aBaths">Санузлы</label><input id="aBaths" inputmode="numeric"></div>
+            <div class="field"><label for="aArea">Площадь, м²</label><input id="aArea" inputmode="numeric"></div>
+          </div>
+          <div class="field"><label for="aDesc">Описание</label><textarea id="aDesc" placeholder="Коротко: вид, этаж, парковка, расстояние до моря, срок сдачи"></textarea></div>
+          <div class="field"><label for="aFiles">Фото</label><input id="aFiles" type="file" accept="image/*" multiple></div>
+          <div class="thumbs" id="aThumbs"></div>
+          <p class="status" id="aPhotoStatus" role="status"></p>
+          <div class="pub">
+            <button class="btn" type="submit" id="aSave">Добавить в каталог</button>
+            <button class="btn ghost" type="button" id="aCancel" hidden>Отменить правку</button>
+          </div>
+          <p class="status bad" id="aErr" role="alert" hidden></p>
+        </form>
+        <div>
+          <h3 style="margin-bottom:10px">Объекты в каталоге</h3>
+          <div class="rows" id="aList"></div>
+        </div>
+        <div class="pub">
+          <button class="btn" type="button" id="aPublish">Опубликовать каталог</button>
+          <span class="status" id="aStatus" role="status"></span>
+        </div>
+        <div id="aFallback" hidden class="field">
+          <label for="aJson">Данные каталога</label>
+          <textarea id="aJson" readonly></textarea>
+          <p class="note">Сохранение прямо со страницы сейчас недоступно. Скопируйте этот текст и отправьте в чат, я обновлю каталог.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="services">
+    <div class="wrap">
+      <div class="head"><span class="label">Услуги</span><h2>Чем мы помогаем</h2></div>
+      <div class="cols">
+        <div class="svc"><h3>Подбор объекта</h3><p>Уточняем задачу, бюджет и район, отбираем варианты, организуем показы, в том числе онлайн.</p></div>
+        <div class="svc"><h3>Сопровождение сделки</h3><p>Договор бронирования, проверка документов и титула вместе с юристом, оплата, регистрация договора.</p></div>
+        <div class="svc"><h3>Аренда</h3><p>Подбираем жильё для проживания, находим арендаторов для собственников, помогаем с заселением.</p></div>
+        <div class="svc"><h3>Инвестиции и ВНЖ</h3><p>Объекты для дохода от аренды и варианты с видом на жительство. Актуальные условия сверяем на консультации.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="districts">
+    <div class="wrap">
+      <div class="head"><span class="label">Районы</span><h2>Где жить в Лимассоле</h2><p class="lead">Общая картина по районам. На показе расскажем о каждом квартале подробнее.</p></div>
+      <div class="cols">
+        <div class="dist"><h3>Старый город и Марина</h3><p>Набережная, рестораны и яхтенная марина в пешей доступности. Много новых апартаментов и башен.</p></div>
+        <div class="dist"><h3>Гермасогия</h3><p>Прибрежная зона с пляжами и отелями. Стабильный спрос на аренду.</p></div>
+        <div class="dist"><h3>Агиос Афанасиос</h3><p>Жилой район недалеко от центра, много новых комплексов и таунхаусов.</p></div>
+        <div class="dist"><h3>Агиос Тихонас</h3><p>Холмы к востоку от центра. Виллы с простором и видом на море.</p></div>
+        <div class="dist"><h3>Месса Гитония</h3><p>Спокойный район рядом с центром, цены обычно ниже прибрежных.</p></div>
+        <div class="dist"><h3>Эрими и Ипсонас</h3><p>Западное направление: больше места, удобный выезд на трассу в сторону Пафоса.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="process">
+    <div class="wrap">
+      <div class="head"><span class="label">Как мы работаем</span><h2>Путь от заявки до ключей</h2></div>
+      <ol class="steps">
+        <li><h3>Заявка и разговор</h3><p>Обсуждаем цель, бюджет, сроки и что важно в районе и самом объекте.</p></li>
+        <li><h3>Подборка</h3><p>Присылаем варианты с цифрами и честными плюсами и минусами.</p></li>
+        <li><h3>Показы</h3><p>Очно или по видеосвязи. Вы смотрите несколько объектов за один день.</p></li>
+        <li><h3>Бронирование</h3><p>Согласуем цену и условия, подписываем договор бронирования.</p></li>
+        <li><h3>Проверка</h3><p>Юрист проверяет документы, титул и разрешения до оплаты.</p></li>
+        <li><h3>Сделка и ключи</h3><p>Договор купли-продажи, регистрация, подключение коммунальных услуг, передача ключей.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band" id="faq">
+    <div class="wrap two">
+      <div class="about">
+        <span class="label">О компании</span>
+        <h2>Atlas Property</h2>
+        <p>Мы команда агентов по недвижимости в Лимассоле. Работаем напрямую с ведущими застройщиками Кипра и подбираем жильё на любой бюджет: новостройки, вторичный рынок, аренду, виллы и коммерческую недвижимость.</p>
+        <p>Говорим на русском, украинском и английском. Ведём клиента от первого звонка до получения ключей.</p>
+      </div>
+      <div>
+        <span class="label">Частые вопросы</span>
+        <details open><summary>Сколько стоят ваши услуги?</summary><p>Для вас они бесплатны. Вознаграждение нам платит продавец или застройщик. Остальные расходы по сделке, такие как налоги, сборы и юридическое сопровождение, обсуждаем заранее и называем до подписания договора.</p></details>
+        <details><summary>Может ли иностранец купить недвижимость на Кипре?</summary><p>Да. Покупателям из-за пределов ЕС обычно нужно получить разрешение на приобретение. Мы помогаем подготовить документы и пройти этот шаг.</p></details>
+        <details><summary>Как связаны покупка недвижимости и ВНЖ?</summary><p>На Кипре есть программы вида на жительство, связанные с покупкой недвижимости. Условия и суммы меняются, поэтому на консультации сверим актуальные требования вместе с юристом.</p></details>
+        <details><summary>Нужно ли приезжать на Кипр для покупки?</summary><p>Показы можно провести по видеосвязи, а часть шагов оформить дистанционно. Лучше хотя бы раз увидеть объект и район лично.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap contact">
+      <div>
+        <span class="label">Контакты</span>
+        <h2>Расскажите, что вы ищете</h2>
+        <p class="lead" style="margin-top:12px">Ответим в WhatsApp или Telegram и подготовим первую подборку.</p>
+        <div class="lines">
+          <div><span class="label">WhatsApp и телефон</span><b id="phoneShow">+357 96 540 591</b></div>
+          <div><span class="label">Telegram</span><b><a id="tgLink" href="https://t.me/sashadoli" target="_blank" rel="noopener">@sashadoli</a></b></div>
+          <div><span class="label">Офис</span><b>Лимассол, Кипр</b></div>
+        </div>
+      </div>
+      <div>
+        <form id="lead" novalidate>
+          <div class="pair">
+            <div class="field"><label for="lName">Имя</label><input id="lName" autocomplete="name" placeholder="Как к вам обращаться"></div>
+            <div class="field"><label for="lContact">Телефон или Telegram</label><input id="lContact" autocomplete="tel" placeholder="+357… или @username"></div>
+          </div>
+          <div class="pair">
+            <div class="field"><label for="lGoal">Что нужно</label>
+              <select id="lGoal"><option>Купить жильё</option><option>Снять жильё</option><option>Инвестиции и аренда</option><option>ВНЖ через недвижимость</option><option>Продать или сдать</option><option>Коммерческая недвижимость</option></select></div>
+            <div class="field"><label for="lBudget">Бюджет</label><input id="lBudget" placeholder="Например, до 500 000 €"></div>
+          </div>
+          <div class="field"><label for="lText">Пожелания</label><textarea id="lText" placeholder="Район, число спален, сроки"></textarea></div>
+          <button class="btn" type="submit">Подготовить сообщение</button>
+          <p class="note status bad" id="formErr" role="alert" hidden style="margin:0"></p>
+          <div class="result" id="result" hidden>
+            <label class="label" for="msg">Готовое сообщение</label>
+            <textarea id="msg" readonly></textarea>
+            <div class="acts">
+              <a class="btn" id="waLink" href="#" target="_blank" rel="noopener">Отправить в WhatsApp</a>
+              <button class="btn ghost" type="button" id="copyBtn">Скопировать текст</button>
+            </div>
+            <p class="note" id="copyNote" style="margin:0" hidden></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Atlas Property · Лимассол, Кипр</span>
+    <span>Информация на сайте носит справочный характер и не является офертой.</span>
+  </div>
+</footer>
+
+<div class="lb" id="lb" hidden role="dialog" aria-label="Фото объекта">
+  <button class="x btn ghost small" id="lbX" type="button" style="color:#fff;border-color:rgba(255,255,255,.4)">Закрыть</button>
+  <img id="lbImg" alt="">
+  <div class="ctrl"><button id="lbPrev" type="button" aria-label="Предыдущее фото">‹</button><span id="lbPos"></span><button id="lbNext" type="button" aria-label="Следующее фото">›</button></div>
+</div>
+
+<script>
+var CONFIG = { whatsapp: "35796540591" };
+var TYPE_NAME = { apartment: "Апартаменты", penthouse: "Пентхаус", townhouse: "Таунхаус", villa: "Вилла", commercial: "Коммерческая", land: "Участок" };
+var DISTRICTS = ["Старый город и Марина", "Гермасогия", "Агиос Афанасиос", "Агиос Тихонас", "Месса Гитония", "Эрими и Ипсонас"];
+var BUDGETS = {
+  sale: [[0, "Любой"], [400000, "до 400 000 €"], [700000, "до 700 000 €"], [1500000, "до 1 500 000 €"], [999999999, "от 1 500 000 €"]],
+  rent: [[0, "Любой"], [1000, "до 1 000 € / мес"], [2000, "до 2 000 € / мес"], [6000, "до 6 000 € / мес"]]
+};
+var state = { deal: "sale", data: { listings: [] }, dirty: false, editId: null, photos: [], art: null, assets: null };
+var $ = function (id) { return document.getElementById(id); };
+var NS = "http://www.w3.org/2000/svg";
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+function photoUrl(p) { return /^(\/|https?:|data:)/.test(p) ? p : "/_blob/" + p; }
+function fmt(n) { return new Intl.NumberFormat("ru-RU").format(n).replace(/\s/g, " "); }
+function plural(n, a, b, c) { var m = n % 100, d = n % 10; return (m > 10 && m < 15) ? c : d === 1 ? a : (d > 1 && d < 5) ? b : c; }
+
+/* Иллюстрация для объектов без фото */
+function windows(x, y, cols, rows, w, h, gx, gy) {
+  var s = "";
+  for (var r = 0; r < rows; r++) for (var c = 0; c < cols; c++)
+    s += '<rect x="' + (x + c * (w + gx)) + '" y="' + (y + r * (h + gy)) + '" width="' + w + '" height="' + h + '" fill="var(--bld2)"/>';
+  return s;
+}
+function art(type) {
+  var b = "";
+  if (type === "apartment" || type === "commercial") {
+    b = '<rect x="140" y="60" width="120" height="140" fill="var(--bld)"/>' + windows(152, 74, 4, 5, 18, 14, 6, 10) + '<rect x="100" y="110" width="50" height="90" fill="var(--bld2)"/><rect x="250" y="130" width="50" height="70" fill="var(--bld2)"/>';
+  } else if (type === "penthouse") {
+    b = '<rect x="150" y="30" width="100" height="170" fill="var(--bld)"/>' + windows(162, 60, 3, 6, 20, 12, 8, 10) + '<rect x="136" y="28" width="128" height="8" fill="var(--bld2)"/><rect x="100" y="120" width="50" height="80" fill="var(--bld2)"/><rect x="250" y="100" width="56" height="100" fill="var(--bld2)"/>';
+  } else if (type === "townhouse") {
+    b = '<rect x="90" y="100" width="70" height="100" fill="var(--bld)"/><rect x="165" y="80" width="70" height="120" fill="var(--bld2)"/><rect x="240" y="100" width="70" height="100" fill="var(--bld)"/>' + windows(100, 116, 2, 2, 22, 18, 6, 12) + windows(175, 96, 2, 3, 22, 18, 6, 10) + windows(250, 116, 2, 2, 22, 18, 6, 12);
+  } else if (type === "land") {
+    b = '<path d="M0 200 L120 150 L260 175 L400 140 L400 200Z" fill="var(--bld2)"/><path d="M60 200 L60 170 M110 200 L110 165 M160 200 L160 172" stroke="var(--bld)" stroke-width="4"/>';
+  } else {
+    b = '<rect x="70" y="110" width="170" height="90" fill="var(--bld)"/><rect x="100" y="86" width="110" height="26" fill="var(--bld2)"/>' + windows(84, 128, 4, 1, 28, 40, 10, 0) + '<rect x="250" y="168" width="80" height="32" fill="var(--sea)"/><rect x="250" y="168" width="80" height="4" fill="var(--bld)"/>';
+  }
+  return '<svg viewBox="0 0 400 240" role="img" aria-label="Иллюстрация объекта" xmlns="' + NS + '"><rect width="400" height="240" fill="var(--sky)"/><circle cx="330" cy="50" r="22" fill="var(--sun)"/><rect y="170" width="400" height="70" fill="var(--sea)"/>' + b + '</svg>';
+}
+$("heroImg").addEventListener("error", function () { $("heroArt").innerHTML = art("villa"); });
+
+/* Каталог */
+function visible() { return state.data.listings.filter(function (l) { return !l.hidden; }); }
+function fillSelect(sel, items, anyLabel) {
+  var cur = sel.value; sel.innerHTML = "";
+  var o = document.createElement("option"); o.value = ""; o.textContent = anyLabel; sel.appendChild(o);
+  items.forEach(function (v) { var x = document.createElement("option"); x.value = v[0]; x.textContent = v[1]; sel.appendChild(x); });
+  if (cur) sel.value = cur;
+}
+function buildFilters() {
+  var vis = visible(), ds = {}, ts = {};
+  vis.forEach(function (l) { if (l.district) ds[l.district] = 1; ts[l.type] = 1; });
+  fillSelect($("fDistrict"), Object.keys(ds).sort().map(function (d) { return [d, d]; }), "Любой");
+  fillSelect($("fType"), Object.keys(ts).map(function (t) { return [t, TYPE_NAME[t] || t]; }), "Любой");
+  buildBudgets();
+}
+function buildBudgets() {
+  var sel = $("fBudget"); sel.innerHTML = "";
+  BUDGETS[state.deal].forEach(function (b) { var o = document.createElement("option"); o.value = b[0]; o.textContent = b[1]; sel.appendChild(o); });
+}
+function cardHtml(l) {
+  var price = l.price ? fmt(l.price) + " €" + (l.deal === "rent" ? " / мес" : "") : "Цена по запросу";
+  var photos = l.photos || [];
+  var pic = photos.length
+    ? '<img src="' + esc(photoUrl(photos[0])) + '" alt="' + esc(l.title) + '" loading="lazy" data-gal="' + esc(l.id) + '">' + (photos.length > 1 ? '<span class="count">' + photos.length + ' фото</span>' : "")
+    : art(l.type);
+  var specs = [];
+  if (l.beds) specs.push(l.beds + " " + plural(l.beds, "спальня", "спальни", "спален"));
+  if (l.baths) specs.push(l.baths + " " + plural(l.baths, "санузел", "санузла", "санузлов"));
+  if (l.area) specs.push(l.area + " м²");
+  return '<article class="card"><div class="art">' + pic + '</div><div class="body">' +
+    '<span class="tag">' + esc(TYPE_NAME[l.type] || "") + (l.district ? " · " + esc(l.district) : "") + '</span>' +
+    '<h3>' + esc(l.title) + '</h3><div class="price">' + price + '</div>' +
+    (specs.length ? '<div class="specs">' + specs.map(function (s) { return "<span>" + s + "</span>"; }).join("") + '</div>' : "") +
+    (l.desc ? '<p class="desc">' + esc(l.desc) + '</p>' : "") +
+    '<a class="btn ghost small" href="#contact" data-ask="' + esc(l.title) + '">Узнать подробнее</a></div></article>';
+}
+function render() {
+  var vis = visible();
+  $("catalog").hidden = vis.length === 0;
+  $("none").hidden = vis.length !== 0;
+  if (!vis.length) return;
+  var d = $("fDistrict").value, t = $("fType").value, max = Number($("fBudget").value) || 0;
+  var list = vis.filter(function (l) {
+    var p = l.price || 0;
+    var okB = !max || (max === 999999999 ? p >= 1500000 : p <= max);
+    return l.deal === state.deal && (!d || l.district === d) && (!t || l.type === t) && okB;
+  });
+  $("grid").innerHTML = list.map(cardHtml).join("");
+  $("grid").hidden = list.length === 0;
+  $("empty").hidden = list.length > 0;
+}
+document.querySelectorAll(".seg button").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    state.deal = btn.getAttribute("data-deal");
+    document.querySelectorAll(".seg button").forEach(function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
+    buildBudgets(); render();
+  });
+});
+["fDistrict", "fType", "fBudget"].forEach(function (id) { $(id).addEventListener("change", render); });
+$("grid").addEventListener("click", function (e) {
+  var a = e.target.closest("[data-ask]");
+  if (a) $("lText").value = "Интересует объект: " + a.getAttribute("data-ask");
+  var g = e.target.closest("[data-gal]");
+  if (g) openLb(g.getAttribute("data-gal"));
+});
+
+/* Просмотр фото */
+var lb = { photos: [], i: 0 };
+function showLb() {
+  $("lbImg").src = photoUrl(lb.photos[lb.i]);
+  $("lbPos").textContent = (lb.i + 1) + " / " + lb.photos.length;
+}
+function openLb(id) {
+  var l = state.data.listings.filter(function (x) { return x.id === id; })[0];
+  if (!l || !l.photos || !l.photos.length) return;
+  lb.photos = l.photos; lb.i = 0; showLb(); $("lb").hidden = false; $("lbX").focus();
+}
+function closeLb() { $("lb").hidden = true; }
+$("lbX").addEventListener("click", closeLb);
+$("lb").addEventListener("click", function (e) { if (e.target === $("lb")) closeLb(); });
+$("lbPrev").addEventListener("click", function () { lb.i = (lb.i + lb.photos.length - 1) % lb.photos.length; showLb(); });
+$("lbNext").addEventListener("click", function () { lb.i = (lb.i + 1) % lb.photos.length; showLb(); });
+document.addEventListener("keydown", function (e) {
+  if ($("lb").hidden) return;
+  if (e.key === "Escape") closeLb();
+  if (e.key === "ArrowLeft") $("lbPrev").click();
+  if (e.key === "ArrowRight") $("lbNext").click();
+});
+
+/* Контакты и форма */
+$("waTop").href = "https://wa.me/" + CONFIG.whatsapp;
+$("lead").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var name = $("lName").value.trim(), contact = $("lContact").value.trim(), err = $("formErr");
+  if (!name || !contact) { err.textContent = "Укажите имя и телефон или Telegram, чтобы мы могли ответить."; err.hidden = false; return; }
+  err.hidden = true;
+  var parts = ["Здравствуйте! Меня зовут " + name + ".", "Цель: " + $("lGoal").value + "."];
+  if ($("lBudget").value.trim()) parts.push("Бюджет: " + $("lBudget").value.trim() + ".");
+  if ($("lText").value.trim()) parts.push("Пожелания: " + $("lText").value.trim());
+  parts.push("Мои контакты: " + contact + ".");
+  var text = parts.join("\n");
+  $("msg").value = text;
+  $("waLink").href = "https://wa.me/" + CONFIG.whatsapp + "?text=" + encodeURIComponent(text);
+  $("result").hidden = false; $("copyNote").hidden = true;
+});
+$("copyBtn").addEventListener("click", function () {
+  var note = $("copyNote"), ta = $("msg");
+  function done(ok) { note.textContent = ok ? "Текст скопирован." : "Выделите текст и скопируйте вручную."; note.hidden = false; }
+  try { navigator.clipboard.writeText(ta.value).then(function () { done(true); }, function () { ta.select(); done(false); }); }
+  catch (x) { ta.select(); done(false); }
+});
+$("themeBtn").addEventListener("click", function () {
+  var root = document.documentElement;
+  var cur = root.getAttribute("data-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+});
+
+/* Панель владельца */
+function setStatus(el, text, kind) { el.textContent = text; el.className = "status" + (kind ? " " + kind : ""); }
+function markDirty() { state.dirty = true; setStatus($("aStatus"), "Есть неопубликованные изменения.", "warn"); }
+function renderAdmin() {
+  $("aList").innerHTML = state.data.listings.length ? state.data.listings.map(function (l) {
+    return '<div class="row' + (l.hidden ? " off" : "") + '"><div class="t">' + esc(l.title) + '<small>' + (l.deal === "rent" ? "Аренда" : "Продажа") + ' · ' + esc(TYPE_NAME[l.type] || "") + ' · ' + esc(l.district || "") + ' · ' + (l.price ? fmt(l.price) + " €" : "без цены") + (l.hidden ? " · скрыт" : "") + ' · фото: ' + ((l.photos || []).length) + '</small></div>' +
+      '<div class="acts"><button class="btn ghost small" type="button" data-act="edit" data-id="' + esc(l.id) + '">Изменить</button>' +
+      '<button class="btn ghost small" type="button" data-act="hide" data-id="' + esc(l.id) + '">' + (l.hidden ? "Показать" : "Скрыть") + '</button>' +
+      '<button class="btn danger small" type="button" data-act="del" data-id="' + esc(l.id) + '">Удалить</button></div></div>';
+  }).join("") : '<p class="note">Пока пусто. Добавьте первый объект в форме выше.</p>';
+}
+function renderThumbs() {
+  $("aThumbs").innerHTML = state.photos.map(function (id, i) {
+    return '<figure><img src="' + esc(photoUrl(id)) + '" alt=""><button type="button" data-rm="' + i + '" aria-label="Убрать фото">×</button></figure>';
+  }).join("");
+}
+function resetForm() {
+  state.editId = null; state.photos = [];
+  ["aTitle", "aPrice", "aBeds", "aBaths", "aArea", "aDesc", "aDistrict"].forEach(function (id) { $(id).value = ""; });
+  $("aFiles").value = ""; renderThumbs();
+  $("aSave").textContent = "Добавить в каталог"; $("aCancel").hidden = true; $("aErr").hidden = true;
+}
+function num(id) { var v = parseInt(String($(id).value).replace(/\D/g, ""), 10); return isNaN(v) ? 0 : v; }
+function resizeToBlob(file) {
+  return createImageBitmap(file).then(function (bmp) {
+    var k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    var c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    return new Promise(function (res, rej) { c.toBlob(function (b) { b ? res(b) : rej(new Error("toBlob")); }, "image/jpeg", 0.82); });
+  });
+}
+function uploadFiles(files) {
+  var st = $("aPhotoStatus");
+  if (!state.assets) { setStatus(st, "Загрузка фото сейчас недоступна.", "bad"); return; }
+  var list = Array.prototype.slice.call(files), done = 0;
+  setStatus(st, "Загружаем фото: 0 из " + list.length + "…");
+  list.reduce(function (p, f) {
+    return p.then(function () {
+      return resizeToBlob(f).then(function (b) { return state.assets.upload(b, { type: "image/jpeg" }); })
+        .then(function (r) { state.photos.push(r.id); done++; renderThumbs(); setStatus(st, "Загружаем фото: " + done + " из " + list.length + "…"); })
+        .catch(function (e) { setStatus(st, "Не удалось загрузить «" + f.name + "»" + (e && e.code ? " (" + e.code + ")" : "") + ".", "bad"); });
+    });
+  }, Promise.resolve()).then(function () { if (done === list.length) setStatus(st, "Фото загружены: " + done + ".", "ok"); $("aFiles").value = ""; });
+}
+$("aFiles").addEventListener("change", function () { if (this.files.length) uploadFiles(this.files); });
+$("aThumbs").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-rm]"); if (!b) return;
+  state.photos.splice(Number(b.getAttribute("data-rm")), 1); renderThumbs();
+});
+$("aForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var title = $("aTitle").value.trim(), err = $("aErr");
+  if (!title) { err.textContent = "Введите название объекта."; err.hidden = false; return; }
+  err.hidden = true;
+  var obj = { id: state.editId || ("o" + Date.now().toString(36)), deal: $("aDeal").value, type: $("aType").value, district: $("aDistrict").value.trim(), title: title, price: num("aPrice"), beds: num("aBeds"), baths: num("aBaths"), area: num("aArea"), desc: $("aDesc").value.trim(), photos: state.photos.slice(), hidden: false };
+  var list = state.data.listings, idx = -1;
+  list.forEach(function (l, i) { if (l.id === obj.id) idx = i; });
+  if (idx >= 0) { obj.hidden = list[idx].hidden; list[idx] = obj; } else list.unshift(obj);
+  resetForm(); markDirty(); buildFilters(); render(); renderAdmin();
+});
+$("aCancel").addEventListener("click", resetForm);
+$("aList").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-act]"); if (!b) return;
+  var id = b.getAttribute("data-id"), act = b.getAttribute("data-act"), list = state.data.listings;
+  var l = list.filter(function (x) { return x.id === id; })[0]; if (!l) return;
+  if (act === "hide") { l.hidden = !l.hidden; markDirty(); buildFilters(); render(); renderAdmin(); }
+  if (act === "del") {
+    if (b.getAttribute("data-sure") !== "1") { b.setAttribute("data-sure", "1"); b.textContent = "Точно удалить?"; return; }
+    state.data.listings = list.filter(function (x) { return x.id !== id; }); markDirty(); buildFilters(); render(); renderAdmin();
+  }
+  if (act === "edit") {
+    state.editId = l.id; state.photos = (l.photos || []).slice();
+    $("aDeal").value = l.deal; $("aType").value = l.type; $("aDistrict").value = l.district || ""; $("aTitle").value = l.title;
+    $("aPrice").value = l.price || ""; $("aBeds").value = l.beds || ""; $("aBaths").value = l.baths || ""; $("aArea").value = l.area || ""; $("aDesc").value = l.desc || "";
+    renderThumbs(); $("aSave").textContent = "Сохранить правку"; $("aCancel").hidden = false; $("aTitle").focus();
+  }
+});
+$("aPublish").addEventListener("click", function () {
+  var st = $("aStatus");
+  var json = JSON.stringify(state.data, null, 1);
+  function fallback(msg) { setStatus(st, msg, "bad"); $("aJson").value = json; $("aFallback").hidden = false; }
+  if (!state.art) { fallback("Сохранение со страницы недоступно."); return; }
+  setStatus(st, "Публикуем…");
+  state.art.publish({ "listings.json": { content: json, contentType: "application/json" } }).then(function () {
+    state.dirty = false; $("aFallback").hidden = true; setStatus(st, "Каталог опубликован.", "ok");
+  }).catch(function (e) {
+    var c = e && e.code;
+    if (c === "conflict") setStatus(st, "Страница уже обновлена кем-то ещё и сейчас перезагрузится. Повторите правки.", "bad");
+    else if (c === "rate_limited") setStatus(st, "Слишком часто. Подождите минуту и нажмите ещё раз.", "bad");
+    else fallback("Не удалось сохранить" + (c ? " (" + c + ")" : "") + ".");
+  });
+});
+window.addEventListener("beforeunload", function (e) { if (state.dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+function initAdmin() {
+  if (!window.claude || !claude.use) return;
+  Promise.all([claude.use("user"), claude.use("artifact"), claude.use("assets")]).then(function (r) {
+    var user = r[0]; state.art = r[1]; state.assets = r[2];
+    var can = false; try { can = !!(user && user.canEdit()); } catch (x) {}
+    if (!can) return;
+    $("aType").innerHTML = Object.keys(TYPE_NAME).map(function (k) { return '<option value="' + k + '">' + TYPE_NAME[k] + '</option>'; }).join("");
+    $("aDistList").innerHTML = DISTRICTS.map(function (d) { return '<option value="' + d + '">'; }).join("");
+    if (!state.assets) { $("aFiles").disabled = true; setStatus($("aPhotoStatus"), "Загрузка фото недоступна в этом режиме.", "warn"); }
+    $("admin").hidden = false; renderAdmin();
+  }).catch(function () {});
+}
+
+fetch("listings.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (d) {
+  if (d && Array.isArray(d.listings)) state.data = d;
+  state.data.listings.forEach(function (l, i) { if (!l.id) l.id = "o" + i; });
+  buildFilters(); render(); initAdmin();
+});
+</script>
 </body>
 </html>
