@@ -1,7 +1,7 @@
 # Замените ВАШ_ЛОГИН/ИМЯ_РЕПОЗИТОРИЯ на свои данные GitHub, например: ivan-atlas/atlas-property
 backend:
   name: github
-  repo: ВАШ_ЛОГИН/ИМЯ_РЕПОЗИТОРИЯ
+  repo: prorok682-rgb/atlas-property
   branch: main
 
 locale: ru
