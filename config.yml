@@ -1,0 +1,65 @@
+# Замените ВАШ_ЛОГИН/ИМЯ_РЕПОЗИТОРИЯ на свои данные GitHub, например: ivan-atlas/atlas-property
+backend:
+  name: github
+  repo: ВАШ_ЛОГИН/ИМЯ_РЕПОЗИТОРИЯ
+  branch: main
+
+locale: ru
+media_folder: uploads
+public_folder: /uploads
+
+collections:
+  - name: catalog
+    label: Каталог
+    files:
+      - name: listings
+        label: Объекты
+        file: listings.json
+        fields:
+          - label: Объекты
+            name: listings
+            widget: list
+            label_singular: объект
+            summary: "{{fields.title}} · {{fields.price}} €"
+            fields:
+              - { label: Название, name: title, widget: string }
+              - label: Сделка
+                name: deal
+                widget: select
+                default: sale
+                options:
+                  - { label: Продажа, value: sale }
+                  - { label: Аренда, value: rent }
+              - label: Тип
+                name: type
+                widget: select
+                default: apartment
+                options:
+                  - { label: Апартаменты, value: apartment }
+                  - { label: Пентхаус, value: penthouse }
+                  - { label: Таунхаус, value: townhouse }
+                  - { label: Вилла, value: villa }
+                  - { label: Коммерческая, value: commercial }
+                  - { label: Участок, value: land }
+              - label: Район
+                name: district
+                widget: select
+                options:
+                  - Старый город и Марина
+                  - Гермасогия
+                  - Агиос Афанасиос
+                  - Агиос Тихонас
+                  - Месса Гитония
+                  - Эрими и Ипсонас
+                  - Другой
+              - { label: "Цена, € (для аренды в месяц)", name: price, widget: number, value_type: int, min: 0, required: false }
+              - { label: Спальни, name: beds, widget: number, value_type: int, min: 0, required: false }
+              - { label: Санузлы, name: baths, widget: number, value_type: int, min: 0, required: false }
+              - { label: "Площадь, м²", name: area, widget: number, value_type: int, min: 0, required: false }
+              - { label: Описание, name: desc, widget: text, required: false }
+              - label: Фото
+                name: photos
+                widget: list
+                required: false
+                field: { label: Фото, name: photo, widget: image }
+              - { label: "Скрыть с сайта", name: hidden, widget: boolean, default: false, required: false }
