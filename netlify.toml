@@ -1,0 +1,4 @@
+# Static site (Decap CMS admin + listings data) — no build step required.
+[build]
+  command = "echo 'No build step required'"
+  publish = "."
