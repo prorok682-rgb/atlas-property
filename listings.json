@@ -3,7 +3,10 @@
     {
       "baths": 1,
       "photos": [
-        "/uploads/photo_2026-10-23_09-22-04.jpg"
+        "/uploads/photo_2026-10-23_09-22-04.jpg",
+        "/uploads/photo_2026-10-23_09-22-06.jpg",
+        "/uploads/photo_2026-10-23_09-22-03.jpg",
+        "/uploads/photo_2026-10-23_09-22-05.jpg"
       ],
       "price": 1600,
       "hidden": false,
