@@ -1,3 +1,19 @@
 {
-  "listings": []
+  "listings": [
+    {
+      "baths": 1,
+      "photos": [
+        "/uploads/photo_2026-10-23_09-22-04.jpg"
+      ],
+      "price": 1600,
+      "hidden": false,
+      "deal": "rent",
+      "area": 80,
+      "district": "Старый город и Марина",
+      "desc": "€1850 —> €1600\n\nFully renovated and fully furnished \n2 bedrooms\n1 bathrooms\nUnobstructed sea views\nthe best location - opposite the sea",
+      "beds": 2,
+      "title": "2 bedroom apartment for rent in Limassol ",
+      "type": "apartment"
+    }
+  ]
 }
